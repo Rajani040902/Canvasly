@@ -28,7 +28,9 @@ export default function DashboardPage() {
   };
 
   const client_list = async () => {
-    const axiosRes = await fetch('http://localhost:5000/api/canvases');
+    const axiosRes = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/canvases`
+  );
     const json = await axiosRes.json();
     return json.data;
   };
