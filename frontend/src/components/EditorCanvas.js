@@ -28,15 +28,46 @@ export default function EditorCanvas() {
   };
 
   const handleTransformEnd = (id, e) => {
-    const node = e.target;
+  const node = e.target;
+  const el = elements.find((item) => item.id === id);
+  const scaleX = node.scaleX();
+  const scaleY = node.scaleY();
+
+  if (el.type === 'circle') {
+    const newRadius = Math.max(5, el.radius * ((scaleX + scaleY) / 2));
+    node.scaleX(1);
+    node.scaleY(1);
     updateElement(id, {
       x: node.x(),
       y: node.y(),
       rotation: node.rotation(),
-      scaleX: node.scaleX(),
-      scaleY: node.scaleY(),
+      radius: newRadius,
     });
-  };
+  } else if (el.type === 'rect') {
+    const newWidth = Math.max(5, el.width * scaleX);
+    const newHeight = Math.max(5, el.height * scaleY);
+    node.scaleX(1);
+    node.scaleY(1);
+    updateElement(id, {
+      x: node.x(),
+      y: node.y(),
+      rotation: node.rotation(),
+      width: newWidth,
+      height: newHeight,
+    });
+  } else {
+    // text
+    const newFontSize = Math.max(6, Math.round(el.fontSize * scaleY));
+    node.scaleX(1);
+    node.scaleY(1);
+    updateElement(id, {
+      x: node.x(),
+      y: node.y(),
+      rotation: node.rotation(),
+      fontSize: newFontSize,
+    });
+  }
+};
 
   return (
     <Stage
