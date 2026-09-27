@@ -6,34 +6,48 @@ import Toolbar from '../components/Toolbar';
 import PropertiesPanel from '../components/PropertiesPanel';
 import useEditorStore from '../store/useEditorStore';
 import { canvasApi } from '../lib/api';
+import { useRouter } from 'next/navigation';
 
 const EditorCanvas = dynamic(
   () => import('../components/EditorCanvas'),
   { ssr: false }
 );
 
+
 export default function DashboardPage() {
   const [view, setView] = useState('list');
   const [canvases, setCanvases] = useState([]);
+
+  const router = useRouter();
 
   const canvasId = useEditorStore((s) => s.canvasId);
   const toPayload = useEditorStore((s) => s.toPayload);
   const setSavedId = useEditorStore((s) => s.setSavedId);
   const loadFromServer = useEditorStore((s) => s.loadFromServer);
   const resetCanvas = useEditorStore((s) => s.resetCanvas);
+  const name = useEditorStore((s) => s.name);
+const setName = useEditorStore((s) => s.setName);
+const logout = useEditorStore((s) => s.logout);
 
   const refreshList = async () => {
-    const res = await client_list();
-    setCanvases(res);
-  };
+  try {
+    const res = await canvasApi.list();
+    setCanvases(res || []);
+  } catch (err) {
+    console.error('Failed to load canvases:', err.response?.data || err.message);
+    setCanvases([]);
+    if (err.response?.status === 401) {
+      router.push('/login');
+    }
+  }
+};
 
-  const client_list = async () => {
-    const axiosRes = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/canvases`
-  );
-    const json = await axiosRes.json();
-    return json.data;
-  };
+useEffect(() => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    router.push('/login');
+  }
+}, []);
 
   useEffect(() => {
     if (view === 'list') refreshList();
@@ -83,25 +97,25 @@ export default function DashboardPage() {
     return (
       <main className="list-page">
 
-        <div
-          className="topbar"
-          style={{
-            padding: 0,
-            border: 'none',
-            marginBottom: 8
-          }}
-        >
-          <h1>Canvasly</h1>
+ <div className="topbar-row">
+  <div className="topbar-badge">
+    <h1>Canvasly</h1>
+  </div>
+  <div className="topbar-actions">
+    <button className="btn" onClick={handleNew}>+ New Canvas</button>
+    <button
+      className="btn btn-danger"
+      onClick={() => {
+        logout();
+        router.push('/login');
+      }}
+    >
+      Logout
+    </button>
+  </div>
+</div>
 
-          <button
-            className="btn"
-            onClick={handleNew}
-          >
-            + New Canvas
-          </button>
-        </div>
-
-        <div className="canvas-grid">
+      <div className="canvas-grid">
 
           {canvases.map((c) => (
             <div
@@ -147,18 +161,22 @@ export default function DashboardPage() {
   return (
     <main>
 
-      <div className="topbar">
-
-        <h1>Canvasly</h1>
-
-        <button
-          className="btn btn-secondary"
-          onClick={() => setView('list')}
-        >
-          &larr; Back
-        </button>
-
-      </div>
+  <div className="editor-topbar">
+  <h1>Canvasly</h1>
+  <input
+    type="text"
+    value={name}
+    onChange={(e) => setName(e.target.value)}
+    placeholder="Canvas name"
+    style={{ padding: 6, marginLeft: 10, borderRadius: 4 }}
+  />
+  <button
+    className="btn btn-secondary"
+    onClick={() => setView('list')}
+  >
+    &larr; Back
+  </button>
+</div>
 
       <Toolbar />
 

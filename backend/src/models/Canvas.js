@@ -8,6 +8,11 @@ const canvasSchema = new mongoose.Schema(
     height: { type: Number, default: 700 },
     background: { type: String, default: '#ffffff' },
     elements: { type: [elementSchema], default: [] },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
   },
   { timestamps: true }
 );

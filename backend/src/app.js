@@ -3,6 +3,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const canvasRoutes = require('./routes/canvasRoutes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
+const authRoutes = require('./routes/authRoutes');
 
 function createApp() {
   const app = express();
@@ -16,6 +17,8 @@ function createApp() {
   });
 
   app.use('/api/canvases', canvasRoutes);
+
+  app.use('/api/auth', authRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

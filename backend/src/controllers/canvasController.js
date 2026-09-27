@@ -10,31 +10,34 @@ const createCanvas = asyncHandler(async (req, res) => {
     height,
     background,
     elements,
+    owner: req.user._id,
   });
 
   res.status(201).json({ success: true, data: canvas });
 });
 
- const getCanvases = asyncHandler(async (req, res) => {
-  const canvases = await Canvas.find();
+const getCanvases = asyncHandler(async (req, res) => {
+  const canvases = await Canvas.find({ owner: req.user._id });
   res.status(200).json({ success: true, data: canvases });
 });
 
 const getCanvasById = asyncHandler(async (req, res) => {
-  const canvas = await Canvas.findById(req.params.id);
+  const canvas = await Canvas.findOne({ _id: req.params.id, owner: req.user._id });
+  if (!canvas) {
+    res.status(404);
+    throw new Error('Canvas not found');
+  }
   res.status(200).json({ success: true, data: canvas });
 });
 
 const updateCanvas = asyncHandler(async (req, res) => {
-  const canvas = await Canvas.findById(req.params.id);
-
+  const canvas = await Canvas.findOne({ _id: req.params.id, owner: req.user._id });
   if (!canvas) {
     res.status(404);
     throw new Error('Canvas not found');
   }
 
   const { name, width, height, background, elements } = req.body;
-
   if (name !== undefined) canvas.name = name;
   if (width !== undefined) canvas.width = width;
   if (height !== undefined) canvas.height = height;
@@ -46,8 +49,7 @@ const updateCanvas = asyncHandler(async (req, res) => {
 });
 
 const deleteCanvas = asyncHandler(async (req, res) => {
-  const canvas = await Canvas.findById(req.params.id);
-
+  const canvas = await Canvas.findOne({ _id: req.params.id, owner: req.user._id });
   if (!canvas) {
     res.status(404);
     throw new Error('Canvas not found');
