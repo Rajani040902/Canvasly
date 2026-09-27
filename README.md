@@ -1,6 +1,6 @@
 # Canvasly
 
-A mini design canvas application built as part of the **Glazia Full Stack Developer Intern Assignment**.
+A mini design canvas application built.
 
 Canvasly allows users to create canvases, add and edit graphical elements, move and transform them, and persist canvas data using a Node.js, Express.js, and MongoDB backend.
 
